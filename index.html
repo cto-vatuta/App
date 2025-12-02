@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Tor Ruta · App de Conductor</title>
+  <title>Vatuta Ruta · App de Conductor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -83,6 +83,55 @@
       display: flex;
       flex-direction: column;
       height: 100%;
+    }
+
+    /* Splash screen Vatuta */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 2000;
+      opacity: 1;
+      animation: splashFadeOut 1.8s ease forwards;
+      animation-delay: 2.4s;
+    }
+
+    #splash-logo {
+      width: 260px;
+      max-width: 70vw;
+      height: auto;
+      opacity: 0;
+      animation: splashLogoIn 1.4s ease forwards;
+    }
+
+    #splash-tagline {
+      font-size: 18px;
+      margin-top: 14px;
+      opacity: 0;
+      color: #333333;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      animation: splashTaglineIn 1.4s ease forwards;
+      animation-delay: 0.7s;
+    }
+
+    @keyframes splashLogoIn {
+      from { transform: translateY(24px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    @keyframes splashTaglineIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    @keyframes splashFadeOut {
+      to { opacity: 0; visibility: hidden; }
     }
 
     /* Barra superior */
@@ -1029,14 +1078,24 @@
   </style>
 </head>
 <body>
+  <!-- Splash inicial Vatuta -->
+  <div id="splash">
+    <img
+      id="splash-logo"
+      src="https://cdn.prod.website-files.com/674901a11db9b4d9a44bc479/674905d480796c895a7ab7a8_Vatuta_Logo_tagline_oficial-p-2000.png"
+      alt="Vatuta Logo"
+    />
+    <div id="splash-tagline">Logística inteligente en movimiento</div>
+  </div>
+
   <div class="app-shell">
     <div class="app-content">
       <!-- Barra superior -->
       <header class="top-bar">
         <div class="top-left">
-          <div class="brand-circle">T</div>
+          <div class="brand-circle">V</div>
           <div class="brand-text">
-            <div class="brand-name">Tor Ruta</div>
+            <div class="brand-name">Vatuta Ruta</div>
             <div class="brand-subtitle">App de conductor</div>
           </div>
         </div>
@@ -1338,7 +1397,7 @@
 
               <div class="stop-card" data-stop-id="S15">
                 <div class="stop-header-row">
-                  <span class="stop-code">P-15 · Base Tor Ruta</span>
+                  <span class="stop-code">P-15 · Base Vatuta</span>
                   <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
                 </div>
                 <div class="stop-address">
@@ -2020,7 +2079,7 @@
       S15: {
         id: "S15",
         code: "P-15",
-        name: "Base Tor Ruta",
+        name: "Base Vatuta",
         address: "Patio de maniobras principal.",
         window: "19:35 - 20:00",
         contact: "Supervisor de base",
@@ -2097,6 +2156,14 @@
     ];
 
     document.addEventListener("DOMContentLoaded", () => {
+      // Ocultar splash después de la animación
+      const splash = document.getElementById("splash");
+      if (splash) {
+        setTimeout(() => {
+          splash.style.display = "none";
+        }, 2600);
+      }
+
       initClock();
       initNavigation();
       initStart();
@@ -2207,7 +2274,7 @@
           if (pillEl) pillEl.textContent = "Resumen de jornada";
           break;
         default:
-          title = "Tor Ruta";
+          title = "Vatuta Ruta";
           subtitle = "";
       }
 
