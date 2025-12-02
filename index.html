@@ -1,0 +1,2874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tor Ruta · App de Conductor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-page: #e5e7eb;
+      --app-shell: #f9fafb;
+      --app-border: #d1d5db;
+      --app-radius: 28px;
+
+      --bg-main: #ffffff;
+      --bg-soft: #f3f4f6;
+      --bg-softer: #f9fafb;
+
+      --primary: #16a34a;
+      --primary-soft: #dcfce7;
+      --primary-strong: #15803d;
+      --accent: #0ea5e9;
+      --danger: #b91c1c;
+      --warning: #b45309;
+
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --text-soft: #9ca3af;
+
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-pill: 999px;
+
+      --shadow-app: 0 20px 40px rgba(15, 23, 42, 0.18);
+      --shadow-card: 0 14px 28px rgba(15, 23, 42, 0.08);
+
+      --transition-fast: 160ms ease-out;
+      --transition-med: 220ms ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #e5e7eb 0, #d1d5db 40%, #9ca3af 100%);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .app-shell {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 100%;
+      max-height: 840px;
+      background: var(--app-shell);
+      border-radius: var(--app-radius);
+      border: 1px solid var(--app-border);
+      box-shadow: var(--shadow-app);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        padding: 32px;
+      }
+    }
+
+    .app-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    /* Barra superior */
+    .top-bar {
+      padding: 10px 18px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 12px;
+      background: #16a34a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ecfdf5;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 10px 20px rgba(22, 163, 74, 0.45);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .top-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .top-pill {
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--primary);
+    }
+
+    /* Encabezado de sección */
+    .section-header {
+      padding: 10px 18px 4px;
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Contenido principal */
+    main {
+      flex: 1;
+      padding: 8px 14px 10px;
+      background: #f3f4f6;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #d1d5db transparent;
+    }
+
+    main::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    main::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 999px;
+    }
+
+    .screen {
+      display: none;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity var(--transition-med), transform var(--transition-med);
+    }
+
+    .screen.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .card {
+      background: var(--bg-main);
+      border-radius: var(--radius-lg);
+      border: 1px solid #e5e7eb;
+      box-shadow: var(--shadow-card);
+      padding: 16px;
+    }
+
+    .card-soft {
+      background: var(--bg-softer);
+      border-radius: var(--radius-md);
+      border: 1px solid #e5e7eb;
+      padding: 12px;
+    }
+
+    .section-block-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-block-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .badge-pill {
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      color: var(--text-muted);
+    }
+
+    .badge-pill.ok {
+      border-color: rgba(22, 163, 74, 0.3);
+      color: #166534;
+      background: #ecfdf5;
+    }
+
+    .badge-pill.pending {
+      border-color: rgba(148, 163, 184, 0.6);
+    }
+
+    .badge-pill.danger {
+      border-color: rgba(185, 28, 28, 0.3);
+      color: #991b1b;
+      background: #fef2f2;
+    }
+
+    .btn {
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast);
+      background: var(--primary);
+      color: #ecfdf5;
+      box-shadow: 0 10px 20px rgba(22, 163, 74, 0.35);
+    }
+
+    .btn:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 6px 12px rgba(22, 163, 74, 0.35);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      box-shadow: none;
+      cursor: default;
+    }
+
+    .btn-secondary {
+      background: #111827;
+      color: #f9fafb;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.35);
+    }
+
+    .btn-light {
+      background: #f9fafb;
+      color: var(--text-main);
+      box-shadow: none;
+      border: 1px solid #e5e7eb;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-muted);
+      box-shadow: none;
+      border: 1px solid #e5e7eb;
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    .btn-sm {
+      padding: 7px 12px;
+      font-size: 12px;
+    }
+
+    .btn-text {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-group > .btn,
+    .btn-group > .btn-light,
+    .btn-group > .btn-secondary {
+      flex: 1;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .input {
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 10px 12px;
+      font-size: 13px;
+      outline: none;
+      background: #f9fafb;
+      color: var(--text-main);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+    }
+
+    .input::placeholder {
+      color: var(--text-soft);
+    }
+
+    .input:focus {
+      border-color: rgba(22, 163, 74, 0.5);
+      box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.3);
+      background: #ffffff;
+    }
+
+    .helper {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .mt-6 { margin-top: 6px; }
+    .mt-8 { margin-top: 8px; }
+    .mt-10 { margin-top: 10px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+
+    .text-xs { font-size: 11px; }
+    .text-sm { font-size: 12px; }
+    .text-muted { color: var(--text-muted); }
+    .text-soft { color: var(--text-soft); }
+
+    /* KPIs */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .kpi-card {
+      background: var(--bg-main);
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      padding: 10px 10px 9px;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.04);
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+    }
+
+    .kpi-main {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    /* Inicio de jornada */
+    .start-header {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .start-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .start-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .start-row strong {
+      color: var(--text-main);
+    }
+
+    /* Lista de paradas */
+    .stop-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stop-card {
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .stop-card:hover {
+      background: #f9fafb;
+      box-shadow: 0 10px 18px rgba(15, 23, 42, 0.06);
+      transform: translateY(-1px);
+      border-color: #d1d5db;
+    }
+
+    .stop-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stop-code {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .stop-status-pill {
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      border: 1px solid #e5e7eb;
+      color: var(--text-muted);
+      background: #f9fafb;
+    }
+
+    .stop-status-pill.asignada {
+      border-color: rgba(148, 163, 184, 0.6);
+    }
+
+    .stop-status-pill.en_camino {
+      border-color: rgba(22, 163, 74, 0.4);
+      color: #166534;
+      background: #ecfdf5;
+    }
+
+    .stop-status-pill.en_sitio {
+      border-color: rgba(234, 179, 8, 0.5);
+      color: #854d0e;
+      background: #fef9c3;
+    }
+
+    .stop-status-pill.entrega_exitosa {
+      border-color: rgba(22, 163, 74, 0.6);
+      color: #166534;
+      background: #dcfce7;
+    }
+
+    .stop-status-pill.entrega_fallida {
+      border-color: rgba(185, 28, 28, 0.6);
+      color: #991b1b;
+      background: #fee2e2;
+    }
+
+    .stop-address {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .stop-footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+
+    /* Detalle de parada */
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .detail-label {
+      color: var(--text-soft);
+    }
+
+    .detail-value {
+      text-align: right;
+    }
+
+    .detail-strong {
+      font-weight: 500;
+    }
+
+    .divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 8px 0;
+    }
+
+    .incident-panel {
+      margin-top: 8px;
+      display: none;
+    }
+
+    .incident-panel.active {
+      display: block;
+    }
+
+    .incident-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .incident-btn {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      font-size: 11px;
+      background: #f9fafb;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .incident-btn:hover {
+      background: #e0f2fe;
+      border-color: #7dd3fc;
+    }
+
+    /* Tracking */
+    .map-card {
+      background: var(--bg-main);
+      border-radius: var(--radius-lg);
+      border: 1px solid #e5e7eb;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .map-title {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .map-subtitle {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .map-container {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+      background: #f3f4f6;
+    }
+
+    .map-image {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .vehicle-dot {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: var(--primary);
+      box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ecfdf5;
+      font-size: 11px;
+      transform: translate(-50%, -50%);
+      transition: top 1.3s cubic-bezier(0.4, 0, 0.2, 1), left 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .vehicle-shadow {
+      position: absolute;
+      width: 26px;
+      height: 10px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(15, 23, 42, 0.25), transparent 70%);
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 50%;
+      pointer-events: none;
+      opacity: 0.7;
+      transition: top 1.3s cubic-bezier(0.4, 0, 0.2, 1), left 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    .status-main {
+      font-weight: 500;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      margin-top: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-inner {
+      height: 100%;
+      width: 10%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #16a34a, #4ade80);
+      box-shadow: 0 0 10px rgba(74, 222, 128, 0.8);
+      transition: width 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .timeline {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .timeline-step {
+      flex: 1;
+      text-align: center;
+      font-size: 10px;
+      color: var(--text-soft);
+      opacity: 0.5;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .timeline-step.active {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    .timeline-step.done {
+      opacity: 0.9;
+    }
+
+    .timeline-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      margin: 0 auto 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+    }
+
+    .timeline-dot::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #d1d5db;
+    }
+
+    .timeline-step.done .timeline-dot {
+      border-color: rgba(22, 163, 74, 0.7);
+    }
+
+    .timeline-step.done .timeline-dot::after {
+      background: var(--primary);
+    }
+
+    .timeline-step.active .timeline-dot {
+      border-color: rgba(22, 163, 74, 0.9);
+      box-shadow: 0 0 8px rgba(22, 163, 74, 0.6);
+    }
+
+    /* Confirmación de entrega */
+    .confirm-steps-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .confirm-step-pill {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      padding: 4px 6px;
+      font-size: 10px;
+      text-align: center;
+      color: var(--text-soft);
+      background: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .confirm-step-pill.active {
+      border-color: rgba(22, 163, 74, 0.7);
+      color: #166534;
+      background: #ecfdf5;
+    }
+
+    .confirm-step-pill.done {
+      border-color: rgba(22, 163, 74, 0.5);
+      color: #15803d;
+      background: #dcfce7;
+    }
+
+    .confirm-step-pill span {
+      white-space: nowrap;
+    }
+
+    .confirm-step {
+      display: none;
+      font-size: 13px;
+    }
+
+    .confirm-step.active {
+      display: block;
+    }
+
+    .confirm-status-label {
+      font-size: 12px;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+
+    .confirm-toggle {
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
+      background: #f9fafb;
+      transition: border-color var(--transition-fast), background var(--transition-fast);
+    }
+
+    .confirm-toggle.active {
+      border-color: rgba(22, 163, 74, 0.7);
+      background: #ecfdf5;
+    }
+
+    .confirm-toggle-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #16a34a;
+      background: #ffffff;
+    }
+
+    .evidence-box {
+      border-radius: 16px;
+      border: 1px dashed #cbd5f5;
+      background: #eef2ff;
+      padding: 10px;
+      font-size: 12px;
+      color: #4b5563;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .signature-box {
+      border-radius: 14px;
+      background: #fefce8;
+      border: 1px dashed #facc15;
+      padding: 10px;
+      font-size: 12px;
+      color: #854d0e;
+      text-align: center;
+    }
+
+    .radio-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+    .radio-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      cursor: pointer;
+      background: #f9fafb;
+      transition: border-color var(--transition-fast), background var(--transition-fast);
+    }
+
+    .radio-chip.active {
+      border-color: rgba(22, 163, 74, 0.7);
+      background: #ecfdf5;
+      color: #166534;
+    }
+
+    .mini-indicator {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      font-size: 12px;
+      display: none;
+    }
+
+    .mini-indicator.show {
+      display: block;
+    }
+
+    /* Perfil */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      background: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f9fafb;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .profile-name {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .profile-role {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .profile-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    /* Toast */
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 70px;
+      transform: translateX(-50%);
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      background: #111827;
+      color: #f9fafb;
+      font-size: 12px;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -6px);
+    }
+
+    /* Navegación inferior */
+    .bottom-nav {
+      padding: 8px 14px 12px;
+      border-top: 1px solid #e5e7eb;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .bottom-nav-inner {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: var(--radius-pill);
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+    }
+
+    .nav-item {
+      flex: 1;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-pill);
+      padding: 4px 4px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--text-soft);
+      transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .nav-item.active {
+      background: #ffffff;
+      color: var(--primary-strong);
+      box-shadow: 0 6px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    .nav-item.active svg {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    .nav-label {
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="app-content">
+      <!-- Barra superior -->
+      <header class="top-bar">
+        <div class="top-left">
+          <div class="brand-circle">T</div>
+          <div class="brand-text">
+            <div class="brand-name">Tor Ruta</div>
+            <div class="brand-subtitle">App de conductor</div>
+          </div>
+        </div>
+        <div class="top-right">
+          <div class="top-pill">
+            <span class="pill-dot"></span>
+            <span id="top-pill-text">Jornada pendiente</span>
+          </div>
+          <span id="top-time">--:--</span>
+        </div>
+      </header>
+
+      <!-- Encabezado dinámico -->
+      <div class="section-header">
+        <div class="section-title" id="section-title">Inicio de jornada</div>
+        <div class="section-subtitle" id="section-subtitle">
+          Revisa tu ruta de hoy y comienza cuando estés listo.
+        </div>
+      </div>
+
+      <!-- Contenido principal -->
+      <main>
+        <!-- INICIO -->
+        <section id="screen-start" class="screen active">
+          <div class="kpi-row">
+            <div class="kpi-card">
+              <div class="kpi-label">Paradas completadas</div>
+              <div class="kpi-main" id="kpi-stops">0 / 15</div>
+              <div class="kpi-sub" id="kpi-effectiveness">Efectividad: -- %</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Tiempo estimado restante</div>
+              <div class="kpi-main" id="kpi-time">--</div>
+              <div class="kpi-sub" id="kpi-distance">Distancia total: -- km</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Incidencias</div>
+              <div class="kpi-main" id="kpi-incidents">0</div>
+              <div class="kpi-sub">Reportes asociados a paradas</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Estado de la jornada</div>
+              <div class="kpi-main" id="kpi-day-status">En preparación</div>
+              <div class="kpi-sub">Listo para iniciar</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="start-header">Buen día, <span id="driver-name-label">Luis</span></div>
+            <div class="start-sub">
+              Tienes una ruta asignada para hoy. Desde aquí puedes iniciar la jornada y controlar tus paradas.
+            </div>
+
+            <div class="card-soft">
+              <div class="section-block-title">
+                <span>Ruta de hoy</span>
+                <span class="badge-pill ok" id="start-route-status">Lista para iniciar</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Código de ruta</span>
+                <span class="detail-value detail-strong" id="start-route-code">R-082 CDMX Norte</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Paradas totales</span>
+                <span class="detail-value" id="start-route-stops">15</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Ventana estimada</span>
+                <span class="detail-value" id="start-route-window">14:00 - 18:30</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Zonas</span>
+                <span class="detail-value">Norte · Centro · Poniente</span>
+              </div>
+              <div class="mt-10 btn-group">
+                <button class="btn-light btn-sm" data-screen-target="screen-stops">
+                  Ver paradas
+                </button>
+                <button id="btn-start-day" class="btn btn-sm">
+                  Iniciar jornada
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-12 text-xs text-soft">
+              El orden sugerido de visita ya está optimizado. Puedes ver la siguiente parada siempre desde la lista de paradas.
+            </div>
+          </div>
+        </section>
+
+        <!-- LISTA DE PARADAS -->
+        <section id="screen-stops" class="screen">
+          <div class="card">
+            <div class="section-block-title">
+              <span>Paradas de hoy</span>
+              <span class="badge-pill" id="stops-summary-pill">0 en curso · 15 asignadas</span>
+            </div>
+            <div class="section-block-subtitle">
+              Toca una parada para ver el detalle, cambiar el estado o registrar una incidencia.
+            </div>
+
+            <div class="stop-list">
+              <!-- 15 paradas -->
+              <div class="stop-card" data-stop-id="S1">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-01 · Farmacia Satélite</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Blvd. Manuel Ávila Camacho 200, Naucalpan.
+                </div>
+                <div class="stop-footer-row">
+                  <span>14:00 - 14:20</span>
+                  <span>Pago contra entrega</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S2">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-02 · Hospital Norte</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Av. de los Poetas 120, Tlalnepantla.
+                </div>
+                <div class="stop-footer-row">
+                  <span>14:25 - 14:45</span>
+                  <span>Entrega prioritaria</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S3">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-03 · Centro Logístico Valle</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Parque industrial Valle, bodega 14.
+                </div>
+                <div class="stop-footer-row">
+                  <span>14:50 - 15:10</span>
+                  <span>Entrega en andén</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S4">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-04 · Laboratorio Roma</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Col. Roma Norte, calle Querétaro 45.
+                </div>
+                <div class="stop-footer-row">
+                  <span>15:15 - 15:35</span>
+                  <span>Muestras biológicas</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S5">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-05 · Clínica Condesa</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Av. Benjamín Hill 120, Hipódromo.
+                </div>
+                <div class="stop-footer-row">
+                  <span>15:40 - 16:00</span>
+                  <span>Entrega en recepción</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S6">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-06 · Farmacia Polanco</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Masaryk 250, Polanco.
+                </div>
+                <div class="stop-footer-row">
+                  <span>16:05 - 16:25</span>
+                  <span>Controlados</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S7">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-07 · Hospital Infantil</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Calz. México-Tacuba 300.
+                </div>
+                <div class="stop-footer-row">
+                  <span>16:30 - 16:50</span>
+                  <span>Entrega en urgencias</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S8">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-08 · Centro Médico Zona Norte</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Av. Montevideo 100, Lindavista.
+                </div>
+                <div class="stop-footer-row">
+                  <span>16:55 - 17:15</span>
+                  <span>Documentos clínicos</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S9">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-09 · Laboratorio Satélite</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Circuito Médicos 18, Satélite.
+                </div>
+                <div class="stop-footer-row">
+                  <span>17:20 - 17:40</span>
+                  <span>Resultados urgentes</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S10">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-10 · Clínica Valle Dorado</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Periférico 250, Valle Dorado.
+                </div>
+                <div class="stop-footer-row">
+                  <span>17:45 - 18:00</span>
+                  <span>Entrega programada</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S11">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-11 · Farmacia Azcapotzalco</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Av. Azcapotzalco 180.
+                </div>
+                <div class="stop-footer-row">
+                  <span>18:05 - 18:20</span>
+                  <span>Pago anticipado</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S12">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-12 · Hospital General Centro</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Col. Centro, Dr. Río de la Loza 50.
+                </div>
+                <div class="stop-footer-row">
+                  <span>18:25 - 18:45</span>
+                  <span>Urgencias nocturnas</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S13">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-13 · Laboratorio Reforma</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Paseo de la Reforma 350.
+                </div>
+                <div class="stop-footer-row">
+                  <span>18:50 - 19:05</span>
+                  <span>Muestras refrigeradas</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S14">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-14 · Bodega Central</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Parque industrial Norte, módulo 7.
+                </div>
+                <div class="stop-footer-row">
+                  <span>19:10 - 19:30</span>
+                  <span>Entrega masiva</span>
+                </div>
+              </div>
+
+              <div class="stop-card" data-stop-id="S15">
+                <div class="stop-header-row">
+                  <span class="stop-code">P-15 · Base Tor Ruta</span>
+                  <span class="stop-status-pill asignada" data-stop-status-pill>ASIGNADA</span>
+                </div>
+                <div class="stop-address">
+                  Patio de maniobras principal.
+                </div>
+                <div class="stop-footer-row">
+                  <span>19:35 - 20:00</span>
+                  <span>Cierre de jornada</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-12 card-soft">
+              <div class="section-block-title">
+                <span>Resumen rápido</span>
+              </div>
+              <div class="start-row">
+                <span>En camino</span>
+                <span><strong id="stops-count-en-camino">0</strong></span>
+              </div>
+              <div class="start-row">
+                <span>En sitio</span>
+                <span><strong id="stops-count-en-sitio">0</strong></span>
+              </div>
+              <div class="start-row">
+                <span>Finalizadas</span>
+                <span><strong id="stops-count-finalizadas">0</strong></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DETALLE DE PARADA -->
+        <section id="screen-stop-detail" class="screen">
+          <div class="card">
+            <div class="section-block-title">
+              <span id="detail-stop-title">Detalle de parada</span>
+              <span id="detail-stop-status-pill" class="badge-pill pending">ASIGNADA</span>
+            </div>
+            <div class="section-block-subtitle" id="detail-stop-subtitle">
+              Revisa la dirección, contacto y ventana antes de avanzar con el estado.
+            </div>
+
+            <div class="card-soft">
+              <div class="detail-row">
+                <span class="detail-label">Dirección</span>
+                <span class="detail-value detail-strong" id="detail-stop-address">
+                  -
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Ventana</span>
+                <span class="detail-value" id="detail-stop-window">-</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Contacto</span>
+                <span class="detail-value" id="detail-stop-contact">-</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Teléfono</span>
+                <span class="detail-value" id="detail-stop-phone">-</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Notas</span>
+                <span class="detail-value" id="detail-stop-notes">-</span>
+              </div>
+            </div>
+
+            <div class="mt-10 btn-group">
+              <button id="btn-stop-primary" class="btn">
+                Iniciar desplazamiento
+              </button>
+              <button id="btn-stop-map" class="btn-light">
+                Ver trayecto
+              </button>
+            </div>
+
+            <div class="mt-10">
+              <button id="btn-toggle-incidents" class="btn-text">
+                Reportar incidencia
+              </button>
+              <div id="incident-panel" class="incident-panel card-soft">
+                <div class="text-xs text-muted">
+                  Selecciona el motivo principal. La incidencia quedará asociada a esta parada.
+                </div>
+                <div class="incident-options">
+                  <button class="incident-btn" data-incident="No encuentra dirección">
+                    No encuentra dirección
+                  </button>
+                  <button class="incident-btn" data-incident="Cliente no responde">
+                    Cliente no responde
+                  </button>
+                  <button class="incident-btn" data-incident="Tráfico o bloqueo">
+                    Tráfico o bloqueo
+                  </button>
+                  <button class="incident-btn" data-incident="Reprogramar entrega">
+                    Reprogramar entrega
+                  </button>
+                  <button class="incident-btn" data-incident="Otro motivo">
+                    Otro motivo
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-10">
+              <button class="btn-text" data-screen-target="screen-stops">
+                ← Volver a la lista de paradas
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- TRACKING -->
+        <section id="screen-tracking" class="screen">
+          <div class="map-card">
+            <div class="map-header">
+              <div>
+                <div class="map-title" id="tracking-title">
+                  Trayecto hacia la parada
+                </div>
+                <div class="map-subtitle" id="tracking-subtitle">
+                  Visualiza el avance del vehículo en el mapa.
+                </div>
+              </div>
+              <span class="badge-pill ok" id="tracking-stop-code">P-01</span>
+            </div>
+            <div class="map-container">
+              <!-- Mapa pastel estilo Apple Maps / CDMX Norte -->
+              <svg class="map-image" xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200">
+                <defs>
+                  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#f6f7fb"/>
+                    <stop offset="1" stop-color="#e7f0ff"/>
+                  </linearGradient>
+                </defs>
+                <rect width="320" height="200" fill="url(#bg)" rx="22" ry="22"/>
+                <!-- barrios / zonas -->
+                <rect x="10" y="16" width="120" height="70" fill="#fdfcfb" stroke="#dde3f0" stroke-width="1" rx="10"/>
+                <rect x="140" y="24" width="80" height="60" fill="#fdfcfb" stroke="#dde3f0" stroke-width="1" rx="10"/>
+                <rect x="230" y="18" width="80" height="80" fill="#fdfcfb" stroke="#dde3f0" stroke-width="1" rx="10"/>
+                <rect x="16" y="100" width="96" height="88" fill="#fdfcfb" stroke="#dde3f0" stroke-width="1" rx="10"/>
+                <rect x="124" y="106" width="90" height="80" fill="#fdfcfb" stroke="#dde3f0" stroke-width="1" rx="10"/>
+                <rect x="222" y="112" width="86" height="72" fill="#fdfcfb" stroke="#dde3f0" stroke-width="1" rx="10"/>
+                <!-- avenidas principales -->
+                <path d="M-10 80 C 70 70, 130 70, 210 60 C 260 54, 310 48, 340 40" fill="none" stroke="#b7c8ff" stroke-width="5" stroke-linecap="round"/>
+                <path d="M-10 130 C 70 132, 130 128, 210 120 C 260 115, 310 110, 340 108" fill="none" stroke="#b7c8ff" stroke-width="4" stroke-linecap="round"/>
+                <path d="M60 -10 C 70 40, 72 80, 74 120 C 76 150, 78 190, 80 220" fill="none" stroke="#b7c8ff" stroke-width="4" stroke-linecap="round"/>
+                <path d="M170 -10 C 176 30, 180 70, 182 110 C 184 142, 186 177, 190 220" fill="none" stroke="#b7c8ff" stroke-width="4" stroke-linecap="round"/>
+                <path d="M260 -10 C 262 40, 266 78, 270 118 C 274 150, 278 185, 282 220" fill="none" stroke="#b7c8ff" stroke-width="4" stroke-linecap="round"/>
+                <!-- calles menores -->
+                <g stroke="#e0e7ff" stroke-width="1">
+                  <path d="M20 40 H120"/><path d="M20 52 H120"/><path d="M20 64 H120"/>
+                  <path d="M20 116 H108"/><path d="M20 130 H108"/><path d="M20 144 H108"/>
+                  <path d="M150 40 H210"/><path d="M150 56 H210"/>
+                  <path d="M236 40 H300"/><path d="M236 56 H300"/><path d="M236 72 H300"/>
+                  <path d="M132 124 H210"/><path d="M132 140 H210"/><path d="M132 156 H210"/>
+                  <path d="M232 132 H300"/><path d="M232 150 H300"/>
+                </g>
+                <!-- puntos de interés -->
+                <g>
+                  <circle cx="60" cy="60" r="6" fill="#16a34a" stroke="#ecfdf5" stroke-width="2"/>
+                  <circle cx="190" cy="50" r="6" fill="#16a34a" stroke="#ecfdf5" stroke-width="2"/>
+                  <circle cx="270" cy="60" r="6" fill="#16a34a" stroke="#ecfdf5" stroke-width="2"/>
+                  <circle cx="70" cy="134" r="6" fill="#16a34a" stroke="#ecfdf5" stroke-width="2"/>
+                  <circle cx="168" cy="138" r="6" fill="#16a34a" stroke="#ecfdf5" stroke-width="2"/>
+                  <circle cx="260" cy="144" r="6" fill="#16a34a" stroke="#ecfdf5" stroke-width="2"/>
+                </g>
+                <!-- etiquetas -->
+                <g fill="#6b7280" font-size="10">
+                  <text x="18" y="26">Naucalpan</text>
+                  <text x="146" y="32">Tlalnepantla</text>
+                  <text x="236" y="28">Satélite</text>
+                  <text x="22" y="110">Zona Hospitalaria</text>
+                  <text x="130" y="116">Corredor Reforma</text>
+                  <text x="226" y="124">Zona Industrial</text>
+                </g>
+                <!-- norte -->
+                <g transform="translate(282,26)">
+                  <circle r="10" fill="white" stroke="#d1d5db" stroke-width="1.2"/>
+                  <path d="M0-5 L2 3 L0 2 L-2 3 Z" fill="#16a34a"/>
+                  <text x="0" y="12" font-size="8" text-anchor="middle" fill="#6b7280">N</text>
+                </g>
+              </svg>
+
+              <div id="vehicle-shadow" class="vehicle-shadow"></div>
+              <div id="vehicle-dot" class="vehicle-dot">→</div>
+            </div>
+
+            <div class="status-row">
+              <div>
+                <div class="status-main" id="tracking-status-main">Asignada</div>
+                <div class="text-xs text-soft" id="tracking-status-detail">
+                  Preparando salida desde el punto de origen.
+                </div>
+              </div>
+              <span class="badge-pill ok" id="tracking-status-pill">En horario</span>
+            </div>
+
+            <div class="progress-bar">
+              <div id="tracking-progress" class="progress-inner"></div>
+            </div>
+
+            <div class="timeline">
+              <div class="timeline-step active" data-stage="0">
+                <div class="timeline-dot"></div>
+                <div>Asignada</div>
+              </div>
+              <div class="timeline-step" data-stage="1">
+                <div class="timeline-dot"></div>
+                <div>En camino</div>
+              </div>
+              <div class="timeline-step" data-stage="2">
+                <div class="timeline-dot"></div>
+                <div>En sitio</div>
+              </div>
+              <div class="timeline-step" data-stage="3">
+                <div class="timeline-dot"></div>
+                <div>Entrega</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-soft">
+            <div class="detail-row">
+              <span class="detail-label">Parada actual</span>
+              <span class="detail-value detail-strong" id="tracking-stop-name">Farmacia Satélite</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Tiempo estimado</span>
+              <span class="detail-value" id="tracking-eta">Llegada en aprox. 18 min</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Condición de la ruta</span>
+              <span class="detail-value" id="tracking-route-condition">Tráfico fluido</span>
+            </div>
+
+            <div class="mt-10 btn-group">
+              <button id="btn-tracking-next" class="btn-secondary btn-sm">
+                Ir a registro de entrega
+              </button>
+              <button class="btn-light btn-sm" data-screen-target="screen-stops">
+                Ver lista de paradas
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- CONFIRMACIÓN DE ENTREGA -->
+        <section id="screen-confirm" class="screen">
+          <div class="card">
+            <div class="section-block-title">
+              <span>Registrar entrega</span>
+              <span class="badge-pill ok" id="confirm-stop-code">P-01</span>
+            </div>
+            <div class="section-block-subtitle" id="confirm-stop-name">
+              Farmacia Satélite
+            </div>
+
+            <div class="confirm-steps-header">
+              <div class="confirm-step-pill" data-confirm-step-pill="0">
+                <span>1.</span><span>Ubicación</span>
+              </div>
+              <div class="confirm-step-pill" data-confirm-step-pill="1">
+                <span>2.</span><span>Foto</span>
+              </div>
+              <div class="confirm-step-pill" data-confirm-step-pill="2">
+                <span>3.</span><span>Firma</span>
+              </div>
+              <div class="confirm-step-pill" data-confirm-step-pill="3">
+                <span>4.</span><span>Resultado</span>
+              </div>
+            </div>
+
+            <div class="card-soft">
+              <!-- Paso 1 -->
+              <div class="confirm-step active" data-confirm-step="0">
+                <div class="field-label">Confirmar ubicación</div>
+                <div class="helper">
+                  Confirma que la entrega se realiza en la dirección correcta indicada en la orden.
+                </div>
+                <div id="confirm-location-toggle" class="confirm-toggle mt-8">
+                  <div>
+                    <div class="text-sm">Ubicación verificada</div>
+                    <div id="confirm-location-status" class="confirm-status-label">
+                      Toca para marcar como verificada.
+                    </div>
+                  </div>
+                  <div class="confirm-toggle-icon">✓</div>
+                </div>
+              </div>
+
+              <!-- Paso 2 -->
+              <div class="confirm-step" data-confirm-step="1">
+                <div class="field-label">Registro fotográfico</div>
+                <div class="helper">
+                  Utiliza la cámara del equipo para guardar evidencia en el sistema interno.
+                </div>
+                <div class="evidence-box mt-8">
+                  <div>Foto de la entrega</div>
+                  <div class="text-xs text-soft">
+                    Para efectos de este flujo, marca cuando la foto haya sido capturada.
+                  </div>
+                  <button id="confirm-photo-btn" class="btn-outline btn-sm mt-6">
+                    Marcar foto tomada
+                  </button>
+                  <div id="confirm-photo-status" class="confirm-status-label">
+                    Foto pendiente.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Paso 3 -->
+              <div class="confirm-step" data-confirm-step="2">
+                <div class="field-label">Firma de recepción</div>
+                <div class="helper">
+                  Registra la autorización de la persona que recibe.
+                </div>
+                <div id="confirm-signature-box" class="signature-box mt-8">
+                  Área de firma. Pide a la persona que recibe firmar sobre la pantalla.
+                  <div class="text-xs text-soft mt-6">
+                    Para este flujo, basta con confirmar que la firma fue registrada.
+                  </div>
+                </div>
+                <button id="confirm-signature-btn" class="btn-outline btn-sm mt-6">
+                  Marcar firma registrada
+                </button>
+                <div id="confirm-signature-status" class="confirm-status-label">
+                  Firma pendiente.
+                </div>
+              </div>
+
+              <!-- Paso 4 -->
+              <div class="confirm-step" data-confirm-step="3">
+                <div class="field-label">Resultado de la entrega</div>
+                <div class="helper">
+                  Indica si la entrega fue exitosa y registra el nombre de la persona que recibe.
+                </div>
+
+                <div class="radio-row">
+                  <label class="radio-chip active" data-outcome="exitosa">
+                    <input type="radio" name="confirm-outcome" id="confirm-outcome-success" checked style="display:none" />
+                    ✓ Exitosa
+                  </label>
+                  <label class="radio-chip" data-outcome="fallida">
+                    <input type="radio" name="confirm-outcome" id="confirm-outcome-fail" style="display:none" />
+                    ⚠ No fue posible entregar
+                  </label>
+                </div>
+
+                <div class="field-group mt-8">
+                  <label for="confirm-receiver-input" class="field-label">Nombre de quien recibe</label>
+                  <input id="confirm-receiver-input" class="input" type="text" placeholder="Ej. María López" />
+                  <div id="confirm-receiver-status" class="helper">
+                    Escribe al menos 2 caracteres.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-12 btn-group">
+              <button id="btn-confirm-prev" class="btn-light btn-sm">
+                Atrás
+              </button>
+              <button id="btn-confirm-next" class="btn-secondary btn-sm">
+                Siguiente
+              </button>
+              <button id="btn-confirm-delivery" class="btn btn-sm btn-full" style="display:none;">
+                Confirmar entrega de esta parada
+              </button>
+            </div>
+
+            <div id="confirm-result-panel" class="mini-indicator mt-8">
+              <div id="confirm-result-text">
+                La entrega se registrará aquí cuando confirmes el resultado.
+              </div>
+            </div>
+
+            <div class="mt-10">
+              <button class="btn-text" data-screen-target="screen-stops">
+                ← Volver a paradas
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- PERFIL / RESUMEN -->
+        <section id="screen-profile" class="screen">
+          <div class="card">
+            <div class="profile-header">
+              <div id="profile-avatar" class="profile-avatar">LU</div>
+              <div>
+                <div id="profile-name" class="profile-name">Luis Hernández</div>
+                <div class="profile-role">Conductor · Zona norte CDMX</div>
+              </div>
+            </div>
+
+            <div class="mt-12 card-soft">
+              <div class="section-block-title">
+                <span>Jornada de hoy</span>
+              </div>
+              <div class="profile-row">
+                <span class="text-soft">Estado</span>
+                <span id="profile-day-status">En preparación</span>
+              </div>
+              <div class="profile-row">
+                <span class="text-soft">Paradas finalizadas</span>
+                <span id="profile-stops-done">0 / 15</span>
+              </div>
+              <div class="profile-row">
+                <span class="text-soft">Efectividad</span>
+                <span id="profile-effectiveness">-- %</span>
+              </div>
+              <div class="profile-row">
+                <span class="text-soft">Incidencias registradas</span>
+                <span id="profile-incidents">0</span>
+              </div>
+            </div>
+
+            <div class="mt-12 card-soft">
+              <div class="section-block-title">
+                <span>Resumen operativo</span>
+              </div>
+              <div class="profile-row">
+                <span class="text-soft">Tiempo estimado restante</span>
+                <span id="profile-time-remaining">--</span>
+              </div>
+              <div class="profile-row">
+                <span class="text-soft">Distancia total del día</span>
+                <span id="profile-distance-total">-- km</span>
+              </div>
+            </div>
+
+            <div class="mt-12 btn-group">
+              <button id="btn-end-day" class="btn-light btn-full">
+                Cerrar jornada
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Toast -->
+      <div id="toast" class="toast">
+        <span>✓</span>
+        <span id="toast-text">Incidencia registrada</span>
+      </div>
+
+      <!-- Navegación inferior -->
+      <nav class="bottom-nav">
+        <div class="bottom-nav-inner">
+          <button class="nav-item active" data-screen="screen-start">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4 11.5 12 4l8 7.5V19a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 19v-7.5Z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M10 20v-5h4v5"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span class="nav-label">Inicio</span>
+          </button>
+          <button class="nav-item" data-screen="screen-stops">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M7 5h10M7 12h6M7 19h8"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              />
+              <circle cx="5" cy="5" r="1.3" fill="currentColor"></circle>
+              <circle cx="5" cy="12" r="1.3" fill="currentColor"></circle>
+              <circle cx="5" cy="19" r="1.3" fill="currentColor"></circle>
+            </svg>
+            <span class="nav-label">Paradas</span>
+          </button>
+          <button class="nav-item" data-screen="screen-profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle
+                cx="12"
+                cy="8"
+                r="3.2"
+                stroke="currentColor"
+                stroke-width="1.6"
+                fill="none"
+              />
+              <path
+                d="M6.5 19.5a5.5 5.5 0 0 1 11 0"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span class="nav-label">Perfil</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <script>
+    // Estado base de las paradas
+    const stopsState = {
+      S1: {
+        id: "S1",
+        code: "P-01",
+        name: "Farmacia Satélite",
+        address: "Blvd. Manuel Ávila Camacho 200, Naucalpan.",
+        window: "14:00 - 14:20",
+        contact: "María López",
+        phone: "55 1234 5678",
+        notes: "Entrega con pago contra entrega.",
+        distanceKm: 8.5,
+        status: "asignada",
+      },
+      S2: {
+        id: "S2",
+        code: "P-02",
+        name: "Hospital Norte",
+        address: "Av. de los Poetas 120, Tlalnepantla.",
+        window: "14:25 - 14:45",
+        contact: "Recepción principal",
+        phone: "55 2222 3344",
+        notes: "Entrega prioritaria en admisión.",
+        distanceKm: 6.2,
+        status: "asignada",
+      },
+      S3: {
+        id: "S3",
+        code: "P-03",
+        name: "Centro Logístico Valle",
+        address: "Parque industrial Valle, bodega 14.",
+        window: "14:50 - 15:10",
+        contact: "Supervisor de bodega",
+        phone: "55 9876 5432",
+        notes: "Entrega en andén 3.",
+        distanceKm: 12.4,
+        status: "asignada",
+      },
+      S4: {
+        id: "S4",
+        code: "P-04",
+        name: "Laboratorio Roma",
+        address: "Col. Roma Norte, calle Querétaro 45.",
+        window: "15:15 - 15:35",
+        contact: "Mostrador principal",
+        phone: "55 5544 1100",
+        notes: "Muestras biológicas con prioridad.",
+        distanceKm: 5.1,
+        status: "asignada",
+      },
+      S5: {
+        id: "S5",
+        code: "P-05",
+        name: "Clínica Condesa",
+        address: "Av. Benjamín Hill 120, Hipódromo.",
+        window: "15:40 - 16:00",
+        contact: "Admisiones",
+        phone: "55 4433 2288",
+        notes: "Entrega en recepción principal.",
+        distanceKm: 4.6,
+        status: "asignada",
+      },
+      S6: {
+        id: "S6",
+        code: "P-06",
+        name: "Farmacia Polanco",
+        address: "Masaryk 250, Polanco.",
+        window: "16:05 - 16:25",
+        contact: "Encargado de turno",
+        phone: "55 6677 8899",
+        notes: "Productos controlados, requiere validación.",
+        distanceKm: 7.3,
+        status: "asignada",
+      },
+      S7: {
+        id: "S7",
+        code: "P-07",
+        name: "Hospital Infantil",
+        address: "Calz. México-Tacuba 300.",
+        window: "16:30 - 16:50",
+        contact: "Urgencias pediátricas",
+        phone: "55 3322 4455",
+        notes: "Entrega directa en urgencias.",
+        distanceKm: 9.8,
+        status: "asignada",
+      },
+      S8: {
+        id: "S8",
+        code: "P-08",
+        name: "Centro Médico Zona Norte",
+        address: "Av. Montevideo 100, Lindavista.",
+        window: "16:55 - 17:15",
+        contact: "Recepción consultorios",
+        phone: "55 7788 9900",
+        notes: "Documentos clínicos.",
+        distanceKm: 11.0,
+        status: "asignada",
+      },
+      S9: {
+        id: "S9",
+        code: "P-09",
+        name: "Laboratorio Satélite",
+        address: "Circuito Médicos 18, Satélite.",
+        window: "17:20 - 17:40",
+        contact: "Mostrador de resultados",
+        phone: "55 6677 2211",
+        notes: "Resultados urgentes.",
+        distanceKm: 13.5,
+        status: "asignada",
+      },
+      S10: {
+        id: "S10",
+        code: "P-10",
+        name: "Clínica Valle Dorado",
+        address: "Periférico 250, Valle Dorado.",
+        window: "17:45 - 18:00",
+        contact: "Admisiones",
+        phone: "55 9988 7766",
+        notes: "Entrega programada estándar.",
+        distanceKm: 10.2,
+        status: "asignada",
+      },
+      S11: {
+        id: "S11",
+        code: "P-11",
+        name: "Farmacia Azcapotzalco",
+        address: "Av. Azcapotzalco 180.",
+        window: "18:05 - 18:20",
+        contact: "Cajero principal",
+        phone: "55 7788 2211",
+        notes: "Pago anticipado registrado.",
+        distanceKm: 6.9,
+        status: "asignada",
+      },
+      S12: {
+        id: "S12",
+        code: "P-12",
+        name: "Hospital General Centro",
+        address: "Dr. Río de la Loza 50.",
+        window: "18:25 - 18:45",
+        contact: "Jefatura de enfermería",
+        phone: "55 4433 9922",
+        notes: "Entrega en área de urgencias nocturnas.",
+        distanceKm: 8.1,
+        status: "asignada",
+      },
+      S13: {
+        id: "S13",
+        code: "P-13",
+        name: "Laboratorio Reforma",
+        address: "Paseo de la Reforma 350.",
+        window: "18:50 - 19:05",
+        contact: "Recepción",
+        phone: "55 1122 3344",
+        notes: "Muestras refrigeradas.",
+        distanceKm: 5.4,
+        status: "asignada",
+      },
+      S14: {
+        id: "S14",
+        code: "P-14",
+        name: "Bodega Central",
+        address: "Parque industrial Norte, módulo 7.",
+        window: "19:10 - 19:30",
+        contact: "Coordinador de patio",
+        phone: "55 8899 1100",
+        notes: "Entrega masiva de cierre.",
+        distanceKm: 14.2,
+        status: "asignada",
+      },
+      S15: {
+        id: "S15",
+        code: "P-15",
+        name: "Base Tor Ruta",
+        address: "Patio de maniobras principal.",
+        window: "19:35 - 20:00",
+        contact: "Supervisor de base",
+        phone: "55 5566 7788",
+        notes: "Cierre de jornada y devolución de material.",
+        distanceKm: 4.0,
+        status: "asignada",
+      },
+    };
+
+    const appState = {
+      currentScreen: "screen-start",
+      currentStopId: null,
+      journeyStarted: false,
+      trackingTimer: null,
+      trackingIndex: 0,
+      incidents: 0,
+    };
+
+    const confirmState = {
+      step: 0,
+      locationOk: false,
+      photoOk: false,
+      signatureOk: false,
+      receiverName: "",
+      outcome: "exitosa",
+    };
+
+    // Ruta de puntos para el mapa
+    const routePoints = [
+      { x: 14, y: 76 },
+      { x: 20, y: 72 },
+      { x: 26, y: 68 },
+      { x: 32, y: 63 },
+      { x: 38, y: 59 },
+      { x: 45, y: 55 },
+      { x: 52, y: 51 },
+      { x: 60, y: 47 },
+      { x: 68, y: 44 },
+      { x: 75, y: 40 },
+      { x: 82, y: 37 },
+      { x: 88, y: 34 },
+    ];
+
+    const trackingStages = [
+      {
+        label: "Asignada",
+        detail: "Preparando salida desde el punto de origen.",
+        pill: "Lista para salir",
+        eta: "Salida en pocos minutos",
+        condition: "Tráfico fluido",
+      },
+      {
+        label: "En camino",
+        detail: "Avanzando hacia la parada asignada.",
+        pill: "En desplazamiento",
+        eta: "Llegada en aprox. 18 min",
+        condition: "Tráfico estable",
+      },
+      {
+        label: "En sitio",
+        detail: "Vehículo en la zona de entrega. Ajusta maniobras de llegada.",
+        pill: "Zona de entrega",
+        eta: "Llegada a punto exacto en minutos",
+        condition: "Calles con tráfico moderado",
+      },
+      {
+        label: "Entrega",
+        detail: "Listo para registrar la entrega y la evidencia.",
+        pill: "Registrar resultado",
+        eta: "Procede con la confirmación",
+        condition: "Detenido en destino",
+      },
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initClock();
+      initNavigation();
+      initStart();
+      initStops();
+      initStopDetail();
+      initTracking();
+      initConfirm();
+      initProfile();
+      refreshKPIs();
+    });
+
+    function initClock() {
+      const timeEl = document.getElementById("top-time");
+      const update = () => {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, "0");
+        const m = String(now.getMinutes()).padStart(2, "0");
+        if (timeEl) timeEl.textContent = `${h}:${m}`;
+      };
+      update();
+      setInterval(update, 30000);
+    }
+
+    function initNavigation() {
+      const navButtons = document.querySelectorAll(".nav-item");
+      navButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = btn.getAttribute("data-screen");
+          if (target) showScreen(target);
+        });
+      });
+
+      document.querySelectorAll("[data-screen-target]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const target = el.getAttribute("data-screen-target");
+          if (target) showScreen(target);
+        });
+      });
+    }
+
+    function showScreen(screenId) {
+      const screens = document.querySelectorAll(".screen");
+      screens.forEach((s) => {
+        if (s.id === screenId) {
+          s.classList.add("active");
+        } else {
+          s.classList.remove("active");
+        }
+      });
+      appState.currentScreen = screenId;
+      updateNavState(screenId);
+      updateHeader(screenId);
+      if (screenId === "screen-stops") {
+        refreshStopsSummary();
+      }
+      if (screenId === "screen-profile") {
+        refreshProfile();
+      }
+    }
+
+    function updateNavState(screenId) {
+      const navButtons = document.querySelectorAll(".nav-item");
+      navButtons.forEach((btn) => {
+        const target = btn.getAttribute("data-screen");
+        btn.classList.toggle("active", target === screenId);
+      });
+    }
+
+    function updateHeader(screenId) {
+      const titleEl = document.getElementById("section-title");
+      const subtitleEl = document.getElementById("section-subtitle");
+      const pillEl = document.getElementById("top-pill-text");
+
+      let title = "";
+      let subtitle = "";
+
+      switch (screenId) {
+        case "screen-start":
+          title = "Inicio de jornada";
+          subtitle = "Revisa tu ruta de hoy y comienza cuando estés listo.";
+          if (pillEl) {
+            pillEl.textContent = appState.journeyStarted ? "Jornada en curso" : "Jornada pendiente";
+          }
+          break;
+        case "screen-stops":
+          title = "Paradas de hoy";
+          subtitle = "Controla el avance de cada entrega desde esta vista.";
+          if (pillEl) pillEl.textContent = "Seguimiento de paradas";
+          break;
+        case "screen-stop-detail":
+          title = "Detalle de parada";
+          subtitle = "Información clave para ejecutar la entrega correctamente.";
+          if (pillEl) pillEl.textContent = "Entrega en foco";
+          break;
+        case "screen-tracking":
+          title = "Trayecto en curso";
+          subtitle = "Visualización del avance hacia la parada seleccionada.";
+          if (pillEl) pillEl.textContent = "Ruta activa";
+          break;
+        case "screen-confirm":
+          title = "Confirmar entrega";
+          subtitle = "Verifica los pasos clave antes de finalizar.";
+          if (pillEl) pillEl.textContent = "Registro de entrega";
+          break;
+        case "screen-profile":
+          title = "Perfil del conductor";
+          subtitle = "Estado general de la jornada y métricas.";
+          if (pillEl) pillEl.textContent = "Resumen de jornada";
+          break;
+        default:
+          title = "Tor Ruta";
+          subtitle = "";
+      }
+
+      if (titleEl) titleEl.textContent = title;
+      if (subtitleEl) subtitleEl.textContent = subtitle;
+    }
+
+    function initStart() {
+      const btnStart = document.getElementById("btn-start-day");
+      if (btnStart) {
+        btnStart.addEventListener("click", () => {
+          appState.journeyStarted = true;
+          showToast("Jornada iniciada. Comienza con la primera parada.");
+          refreshKPIs();
+          refreshProfile();
+          showScreen("screen-stops");
+        });
+      }
+    }
+
+    function initStops() {
+      const cards = document.querySelectorAll(".stop-card");
+      cards.forEach((card) => {
+        card.addEventListener("click", () => {
+          const stopId = card.getAttribute("data-stop-id");
+          if (!stopId) return;
+          appState.currentStopId = stopId;
+          openStopDetail(stopId);
+        });
+      });
+      refreshStopsSummary();
+    }
+
+    function refreshStopsSummary() {
+      let enCamino = 0;
+      let enSitio = 0;
+      let finalizadas = 0;
+
+      for (const id in stopsState) {
+        const stop = stopsState[id];
+        if (stop.status === "en_camino") enCamino++;
+        if (stop.status === "en_sitio") enSitio++;
+        if (stop.status === "entrega_exitosa" || stop.status === "entrega_fallida") finalizadas++;
+
+        const card = document.querySelector(`.stop-card[data-stop-id="${id}"]`);
+        if (!card) continue;
+        const pill = card.querySelector("[data-stop-status-pill]");
+        if (!pill) continue;
+
+        pill.classList.remove("asignada", "en_camino", "en_sitio", "entrega_exitosa", "entrega_fallida");
+
+        let text = "ASIGNADA";
+        if (stop.status === "asignada") {
+          pill.classList.add("asignada");
+          text = "ASIGNADA";
+        } else if (stop.status === "en_camino") {
+          pill.classList.add("en_camino");
+          text = "EN CAMINO";
+        } else if (stop.status === "en_sitio") {
+          pill.classList.add("en_sitio");
+          text = "EN SITIO";
+        } else if (stop.status === "entrega_exitosa") {
+          pill.classList.add("entrega_exitosa");
+          text = "ENTREGADA";
+        } else if (stop.status === "entrega_fallida") {
+          pill.classList.add("entrega_fallida");
+          text = "NO ENTREGADA";
+        }
+        pill.textContent = text;
+      }
+
+      const summary = document.getElementById("stops-summary-pill");
+      if (summary) {
+        const total = Object.keys(stopsState).length;
+        const asignadas = total - enCamino - enSitio - finalizadas;
+        summary.textContent = `${enCamino} en camino · ${enSitio} en sitio · ${finalizadas} finalizadas · ${asignadas} asignadas`;
+      }
+
+      const cCamino = document.getElementById("stops-count-en-camino");
+      const cSitio = document.getElementById("stops-count-en-sitio");
+      const cFin = document.getElementById("stops-count-finalizadas");
+
+      if (cCamino) cCamino.textContent = enCamino;
+      if (cSitio) cSitio.textContent = enSitio;
+      if (cFin) cFin.textContent = finalizadas;
+
+      refreshKPIs();
+    }
+
+    function openStopDetail(stopId) {
+      const stop = stopsState[stopId];
+      if (!stop) return;
+
+      const titleEl = document.getElementById("detail-stop-title");
+      const statusPill = document.getElementById("detail-stop-status-pill");
+      const addrEl = document.getElementById("detail-stop-address");
+      const windowEl = document.getElementById("detail-stop-window");
+      const contactEl = document.getElementById("detail-stop-contact");
+      const phoneEl = document.getElementById("detail-stop-phone");
+      const notesEl = document.getElementById("detail-stop-notes");
+      const btnPrimary = document.getElementById("btn-stop-primary");
+
+      if (titleEl) titleEl.textContent = `${stop.code} · ${stop.name}`;
+      if (addrEl) addrEl.textContent = stop.address;
+      if (windowEl) windowEl.textContent = stop.window;
+      if (contactEl) contactEl.textContent = stop.contact;
+      if (phoneEl) phoneEl.textContent = stop.phone;
+      if (notesEl) notesEl.textContent = stop.notes;
+
+      if (statusPill) {
+        statusPill.classList.remove("ok", "pending", "danger");
+        if (stop.status === "asignada") {
+          statusPill.textContent = "ASIGNADA";
+          statusPill.classList.add("pending");
+        } else if (stop.status === "en_camino") {
+          statusPill.textContent = "EN CAMINO";
+          statusPill.classList.add("ok");
+        } else if (stop.status === "en_sitio") {
+          statusPill.textContent = "EN SITIO";
+          statusPill.classList.add("ok");
+        } else if (stop.status === "entrega_exitosa") {
+          statusPill.textContent = "ENTREGADA";
+          statusPill.classList.add("ok");
+        } else if (stop.status === "entrega_fallida") {
+          statusPill.textContent = "NO ENTREGADA";
+          statusPill.classList.add("danger");
+        }
+      }
+
+      if (btnPrimary) {
+        let text = "";
+        let mode = "";
+        if (stop.status === "asignada") {
+          text = "Iniciar desplazamiento";
+          mode = "start";
+        } else if (stop.status === "en_camino") {
+          text = "Marcar como en sitio";
+          mode = "onsite";
+        } else if (stop.status === "en_sitio") {
+          text = "Registrar entrega";
+          mode = "confirm";
+        } else {
+          text = "Entrega finalizada";
+          mode = "none";
+        }
+        btnPrimary.textContent = text;
+        btnPrimary.dataset.actionMode = mode;
+        btnPrimary.disabled = mode === "none";
+      }
+
+      showScreen("screen-stop-detail");
+    }
+
+    function initStopDetail() {
+      const btnPrimary = document.getElementById("btn-stop-primary");
+      const btnMap = document.getElementById("btn-stop-map");
+      const btnToggleIncidents = document.getElementById("btn-toggle-incidents");
+      const incidentPanel = document.getElementById("incident-panel");
+
+      if (btnPrimary) {
+        btnPrimary.addEventListener("click", () => {
+          const mode = btnPrimary.dataset.actionMode;
+          const stopId = appState.currentStopId;
+          if (!stopId) return;
+          const stop = stopsState[stopId];
+
+          if (mode === "start") {
+            stop.status = "en_camino";
+            appState.journeyStarted = true;
+            refreshStopsSummary();
+            startTrackingForStop(stopId);
+            showScreen("screen-tracking");
+          } else if (mode === "onsite") {
+            stop.status = "en_sitio";
+            refreshStopsSummary();
+            showToast("Parada marcada como en sitio.");
+            openStopDetail(stopId);
+          } else if (mode === "confirm") {
+            prepareConfirmScreen(stopId);
+            showScreen("screen-confirm");
+          }
+        });
+      }
+
+      if (btnMap) {
+        btnMap.addEventListener("click", () => {
+          const stopId = appState.currentStopId;
+          if (!stopId) return;
+          startTrackingForStop(stopId);
+          showScreen("screen-tracking");
+        });
+      }
+
+      if (btnToggleIncidents && incidentPanel) {
+        btnToggleIncidents.addEventListener("click", () => {
+          incidentPanel.classList.toggle("active");
+        });
+      }
+
+      document.querySelectorAll(".incident-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const reason = btn.getAttribute("data-incident") || "Incidencia";
+          appState.incidents += 1;
+          refreshKPIs();
+          refreshProfile();
+          showToast(`Incidencia registrada: ${reason}`);
+        });
+      });
+    }
+
+    function initTracking() {
+      const btnNext = document.getElementById("btn-tracking-next");
+      if (btnNext) {
+        btnNext.addEventListener("click", () => {
+          const stopId = appState.currentStopId || "S1";
+          prepareConfirmScreen(stopId);
+          showScreen("screen-confirm");
+        });
+      }
+      resetTracking();
+      startTrackingInterval();
+    }
+
+    function startTrackingForStop(stopId) {
+      const stop = stopsState[stopId];
+      if (!stop) return;
+
+      const tTitle = document.getElementById("tracking-title");
+      const tSubtitle = document.getElementById("tracking-subtitle");
+      const tCode = document.getElementById("tracking-stop-code");
+      const tName = document.getElementById("tracking-stop-name");
+
+      if (tTitle) tTitle.textContent = `Trayecto hacia ${stop.name}`;
+      if (tSubtitle) tSubtitle.textContent = "Sigue la ruta sugerida hasta la dirección indicada.";
+      if (tCode) tCode.textContent = stop.code;
+      if (tName) tName.textContent = stop.name;
+
+      resetTracking();
+      startTrackingInterval();
+    }
+
+    function resetTracking() {
+      appState.trackingIndex = 0;
+      updateVehiclePosition();
+      updateTrackingUI();
+    }
+
+    function startTrackingInterval() {
+      if (appState.trackingTimer) {
+        clearInterval(appState.trackingTimer);
+      }
+      appState.trackingTimer = setInterval(() => {
+        appState.trackingIndex++;
+        if (appState.trackingIndex >= routePoints.length) {
+          appState.trackingIndex = routePoints.length - 1;
+        }
+        updateVehiclePosition();
+        updateTrackingUI();
+      }, 2400);
+    }
+
+    function updateVehiclePosition() {
+      const vehicle = document.getElementById("vehicle-dot");
+      const shadow = document.getElementById("vehicle-shadow");
+      if (!vehicle || !shadow) return;
+      const idx = Math.max(0, Math.min(routePoints.length - 1, appState.trackingIndex));
+      const p = routePoints[idx];
+      vehicle.style.left = p.x + "%";
+      vehicle.style.top = p.y + "%";
+      shadow.style.left = p.x + "%";
+      shadow.style.top = p.y + "%";
+    }
+
+    function getStageFromIndex(index) {
+      const total = routePoints.length - 1 || 1;
+      const ratio = index / total;
+      if (ratio <= 0.25) return 0;
+      if (ratio <= 0.55) return 1;
+      if (ratio <= 0.8) return 2;
+      return 3;
+    }
+
+    function updateTrackingUI() {
+      const stageIdx = getStageFromIndex(appState.trackingIndex);
+      const stage = trackingStages[stageIdx];
+
+      const statusMain = document.getElementById("tracking-status-main");
+      const statusDetail = document.getElementById("tracking-status-detail");
+      const statusPill = document.getElementById("tracking-status-pill");
+      const eta = document.getElementById("tracking-eta");
+      const condition = document.getElementById("tracking-route-condition");
+      const progress = document.getElementById("tracking-progress");
+
+      if (statusMain) statusMain.textContent = stage.label;
+      if (statusDetail) statusDetail.textContent = stage.detail;
+      if (statusPill) statusPill.textContent = stage.pill;
+      if (eta) eta.textContent = stage.eta;
+      if (condition) condition.textContent = stage.condition;
+
+      if (progress) {
+        const total = routePoints.length - 1 || 1;
+        const pct = Math.min(100, Math.max(10, (appState.trackingIndex / total) * 100));
+        progress.style.width = pct.toFixed(0) + "%";
+      }
+
+      const steps = document.querySelectorAll(".timeline-step");
+      steps.forEach((el) => {
+        const num = Number(el.getAttribute("data-stage") || "0");
+        el.classList.remove("active", "done");
+        if (num < stageIdx) el.classList.add("done");
+        else if (num === stageIdx) el.classList.add("active");
+      });
+    }
+
+    function prepareConfirmScreen(stopId) {
+      const stop = stopsState[stopId];
+      if (!stop) return;
+      const codeEl = document.getElementById("confirm-stop-code");
+      const nameEl = document.getElementById("confirm-stop-name");
+      if (codeEl) codeEl.textContent = stop.code;
+      if (nameEl) nameEl.textContent = stop.name;
+
+      confirmState.step = 0;
+      confirmState.locationOk = false;
+      confirmState.photoOk = false;
+      confirmState.signatureOk = false;
+      confirmState.receiverName = "";
+      confirmState.outcome = "exitosa";
+
+      const input = document.getElementById("confirm-receiver-input");
+      if (input) input.value = "";
+
+      updateConfirmUI();
+    }
+
+    function initConfirm() {
+      const locationToggle = document.getElementById("confirm-location-toggle");
+      const photoBtn = document.getElementById("confirm-photo-btn");
+      const signatureBox = document.getElementById("confirm-signature-box");
+      const signatureBtn = document.getElementById("confirm-signature-btn");
+      const receiverInput = document.getElementById("confirm-receiver-input");
+      const radioChips = document.querySelectorAll(".radio-chip");
+      const btnPrev = document.getElementById("btn-confirm-prev");
+      const btnNext = document.getElementById("btn-confirm-next");
+      const btnConfirm = document.getElementById("btn-confirm-delivery");
+
+      if (locationToggle) {
+        locationToggle.addEventListener("click", () => {
+          confirmState.locationOk = !confirmState.locationOk;
+          updateConfirmUI();
+        });
+      }
+
+      if (photoBtn) {
+        photoBtn.addEventListener("click", () => {
+          confirmState.photoOk = true;
+          updateConfirmUI();
+        });
+      }
+
+      if (signatureBox) {
+        signatureBox.addEventListener("click", () => {
+          confirmState.signatureOk = true;
+          updateConfirmUI();
+        });
+      }
+      if (signatureBtn) {
+        signatureBtn.addEventListener("click", () => {
+          confirmState.signatureOk = true;
+          updateConfirmUI();
+        });
+      }
+
+      if (receiverInput) {
+        receiverInput.addEventListener("input", (e) => {
+          confirmState.receiverName = e.target.value || "";
+          updateConfirmUI();
+        });
+      }
+
+      radioChips.forEach((chip) => {
+        chip.addEventListener("click", () => {
+          const outcome = chip.getAttribute("data-outcome") || "exitosa";
+          confirmState.outcome = outcome;
+          updateConfirmUI();
+        });
+      });
+
+      if (btnPrev) {
+        btnPrev.addEventListener("click", () => {
+          if (confirmState.step > 0) {
+            confirmState.step -= 1;
+            updateConfirmUI();
+          }
+        });
+      }
+
+      if (btnNext) {
+        btnNext.addEventListener("click", () => {
+          if (confirmState.step < 3) {
+            confirmState.step += 1;
+            updateConfirmUI();
+          }
+        });
+      }
+
+      if (btnConfirm) {
+        btnConfirm.addEventListener("click", () => {
+          const stopId = appState.currentStopId;
+          if (!stopId) return;
+          const stop = stopsState[stopId];
+
+          const ready =
+            confirmState.locationOk &&
+            confirmState.photoOk &&
+            confirmState.signatureOk &&
+            confirmState.receiverName.trim().length >= 2;
+
+          if (!ready) {
+            showToast("Completa todos los pasos antes de confirmar.");
+            return;
+          }
+
+          if (confirmState.outcome === "exitosa") {
+            stop.status = "entrega_exitosa";
+          } else {
+            stop.status = "entrega_fallida";
+          }
+
+          refreshStopsSummary();
+          refreshProfile();
+
+          const resultPanel = document.getElementById("confirm-result-panel");
+          const resultText = document.getElementById("confirm-result-text");
+          if (resultPanel && resultText) {
+            resultPanel.classList.add("show");
+            const label = confirmState.outcome === "exitosa" ? "EXITOSA" : "NO ENTREGADA";
+            resultText.textContent = `Entrega registrada como ${label} para ${stop.name}.`;
+          }
+
+          const mensajeToast =
+            confirmState.outcome === "exitosa"
+              ? "Entrega registrada como exitosa."
+              : "Entrega registrada como no entregada.";
+          showToast(mensajeToast);
+        });
+      }
+
+      updateConfirmUI();
+    }
+
+    function updateConfirmUI() {
+      const step = confirmState.step;
+
+      document.querySelectorAll(".confirm-step").forEach((el) => {
+        const idx = Number(el.getAttribute("data-confirm-step") || "0");
+        el.classList.toggle("active", idx === step);
+      });
+
+      const stepPills = document.querySelectorAll(".confirm-step-pill");
+      stepPills.forEach((pill) => {
+        const idx = Number(pill.getAttribute("data-confirm-step-pill") || "0");
+        pill.classList.remove("active", "done");
+        if (idx < step) pill.classList.add("done");
+        else if (idx === step) pill.classList.add("active");
+      });
+
+      const btnPrev = document.getElementById("btn-confirm-prev");
+      const btnNext = document.getElementById("btn-confirm-next");
+      const btnConfirm = document.getElementById("btn-confirm-delivery");
+
+      if (btnPrev) btnPrev.style.display = step === 0 ? "none" : "inline-flex";
+      if (btnNext) btnNext.style.display = step === 3 ? "none" : "inline-flex";
+      if (btnConfirm) btnConfirm.style.display = step === 3 ? "inline-flex" : "none";
+
+      const locationToggle = document.getElementById("confirm-location-toggle");
+      const locationStatus = document.getElementById("confirm-location-status");
+      if (locationToggle) {
+        locationToggle.classList.toggle("active", confirmState.locationOk);
+      }
+      if (locationStatus) {
+        locationStatus.textContent = confirmState.locationOk
+          ? "Ubicación confirmada."
+          : "Toca para marcar como verificada.";
+      }
+
+      const photoStatus = document.getElementById("confirm-photo-status");
+      if (photoStatus) {
+        photoStatus.textContent = confirmState.photoOk
+          ? "Foto registrada correctamente."
+          : "Foto pendiente.";
+      }
+
+      const signatureStatus = document.getElementById("confirm-signature-status");
+      if (signatureStatus) {
+        signatureStatus.textContent = confirmState.signatureOk
+          ? "Firma registrada correctamente."
+          : "Firma pendiente.";
+      }
+
+      const receiverStatus = document.getElementById("confirm-receiver-status");
+      if (receiverStatus) {
+        if (confirmState.receiverName.trim().length >= 2) {
+          receiverStatus.textContent = "Nombre registrado.";
+        } else {
+          receiverStatus.textContent = "Escribe al menos 2 caracteres.";
+        }
+      }
+
+      const radioChips = document.querySelectorAll(".radio-chip");
+      radioChips.forEach((chip) => {
+        const val = chip.getAttribute("data-outcome") || "";
+        chip.classList.toggle("active", val === confirmState.outcome);
+      });
+
+      if (btnNext) {
+        let canNext = true;
+        if (step === 0) canNext = confirmState.locationOk;
+        if (step === 1) canNext = confirmState.photoOk;
+        if (step === 2) canNext = confirmState.signatureOk;
+        btnNext.disabled = !canNext;
+      }
+
+      if (btnConfirm) {
+        const ready =
+          confirmState.locationOk &&
+          confirmState.photoOk &&
+          confirmState.signatureOk &&
+          confirmState.receiverName.trim().length >= 2;
+        btnConfirm.disabled = !ready;
+      }
+    }
+
+    function initProfile() {
+      const btnEndDay = document.getElementById("btn-end-day");
+      if (btnEndDay) {
+        btnEndDay.addEventListener("click", () => {
+          appState.journeyStarted = false;
+          for (const id in stopsState) {
+            stopsState[id].status = "asignada";
+          }
+          appState.incidents = 0;
+          refreshStopsSummary();
+          refreshProfile();
+          showToast("Jornada cerrada. Paradas reiniciadas.");
+          showScreen("screen-start");
+        });
+      }
+      refreshProfile();
+    }
+
+    function refreshProfile() {
+      let finalizadas = 0;
+      let exitosas = 0;
+      let total = 0;
+
+      for (const id in stopsState) {
+        const stop = stopsState[id];
+        total++;
+        if (stop.status === "entrega_exitosa" || stop.status === "entrega_fallida") {
+          finalizadas++;
+        }
+        if (stop.status === "entrega_exitosa") exitosas++;
+      }
+
+      const statusEl = document.getElementById("profile-day-status");
+      const countEl = document.getElementById("profile-stops-done");
+      const effEl = document.getElementById("profile-effectiveness");
+      const incEl = document.getElementById("profile-incidents");
+
+      if (statusEl) {
+        if (!appState.journeyStarted && finalizadas === 0) statusEl.textContent = "En preparación";
+        else if (appState.journeyStarted && finalizadas < total) statusEl.textContent = "En curso";
+        else if (finalizadas === total && total > 0) statusEl.textContent = "Completada";
+      }
+
+      if (countEl) countEl.textContent = `${finalizadas} / ${total}`;
+      const eff = total > 0 ? Math.round((exitosas / total) * 100) : null;
+      if (effEl) effEl.textContent = eff === null ? "-- %" : `${eff} %`;
+      if (incEl) incEl.textContent = String(appState.incidents);
+
+      refreshKPIs();
+
+      const timeEl = document.getElementById("profile-time-remaining");
+      const distEl = document.getElementById("profile-distance-total");
+      const kpiTime = computeRemainingTimeText();
+      const totalDist = computeTotalDistance();
+
+      if (timeEl) timeEl.textContent = kpiTime;
+      if (distEl) distEl.textContent = `${totalDist.toFixed(1)} km`;
+    }
+
+    function computeTotalDistance() {
+      let totalDist = 0;
+      for (const id in stopsState) {
+        totalDist += stopsState[id].distanceKm || 0;
+      }
+      return totalDist;
+    }
+
+    function computeRemainingTimeText() {
+      let pendientes = 0;
+      for (const id in stopsState) {
+        const s = stopsState[id];
+        if (s.status !== "entrega_exitosa" && s.status !== "entrega_fallida") pendientes++;
+      }
+      if (pendientes === 0) return "Sin paradas pendientes";
+
+      const totalMin = pendientes * 18;
+      const horas = Math.floor(totalMin / 60);
+      const minutos = totalMin % 60;
+      if (horas === 0) return `Aprox. ${minutos} min`;
+      return `Aprox. ${horas} h ${minutos} min`;
+    }
+
+    function refreshKPIs() {
+      let finalizadas = 0;
+      let exitosas = 0;
+      let total = 0;
+      for (const id in stopsState) {
+        const s = stopsState[id];
+        total++;
+        if (s.status === "entrega_exitosa" || s.status === "entrega_fallida") finalizadas++;
+        if (s.status === "entrega_exitosa") exitosas++;
+      }
+
+      const kStops = document.getElementById("kpi-stops");
+      const kEff = document.getElementById("kpi-effectiveness");
+      const kTime = document.getElementById("kpi-time");
+      const kDist = document.getElementById("kpi-distance");
+      const kInc = document.getElementById("kpi-incidents");
+      const kDayStatus = document.getElementById("kpi-day-status");
+
+      if (kStops) kStops.textContent = `${finalizadas} / ${total}`;
+      const eff = total > 0 ? Math.round((exitosas / total) * 100) : null;
+      if (kEff) kEff.textContent = eff === null ? "Efectividad: -- %" : `Efectividad: ${eff} %`;
+
+      const remainingTimeText = computeRemainingTimeText();
+      if (kTime) kTime.textContent = remainingTimeText;
+
+      const totalDist = computeTotalDistance();
+      if (kDist) kDist.textContent = `Distancia total: ${totalDist.toFixed(1)} km`;
+      if (kInc) kInc.textContent = String(appState.incidents);
+
+      if (kDayStatus) {
+        if (!appState.journeyStarted && finalizadas === 0) kDayStatus.textContent = "En preparación";
+        else if (appState.journeyStarted && finalizadas < total) kDayStatus.textContent = "En curso";
+        else if (finalizadas === total && total > 0) kDayStatus.textContent = "Completada";
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      const textEl = document.getElementById("toast-text");
+      if (!toast || !textEl) return;
+      textEl.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2800);
+    }
+  </script>
+</body>
+</html>
